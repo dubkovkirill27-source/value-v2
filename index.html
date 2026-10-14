@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberVault — неоновый сейф для файлов</title>
+<style>
+  /* ======================================================================
+     НАСТРОЙКА СКАЧИВАНИЯ:
+     Ниже в скрипте найди строку  const DOWNLOAD_URL = "...";
+     и вставь туда прямую ссылку на файл cyber_vault_premium.py
+     из своего облачного хранилища (Google Диск, Яндекс Диск и т.д.)
+     ====================================================================== */
+  :root {
+    --bg: #0b0b14; --bg2: #12121f; --panel: #161622;
+    --cyan: #7aa2f7; --teal: #2ee6d6; --pink: #f7768e;
+    --purple: #bb9af7; --green: #9ece6a; --text: #c0caf5; --muted: #565f89;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', Arial, sans-serif; overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(600px 300px at 15% 10%, rgba(46,230,214,.08), transparent),
+      radial-gradient(500px 300px at 85% 20%, rgba(187,154,247,.08), transparent),
+      radial-gradient(700px 400px at 50% 90%, rgba(122,162,247,.07), transparent);
+  }
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 40px; backdrop-filter: blur(14px);
+    background: rgba(11,11,20,.7); border-bottom: 1px solid rgba(122,162,247,.15);
+  }
+  .logo { font-weight: bold; font-size: 18px; color: var(--teal);
+    text-shadow: 0 0 12px rgba(46,230,214,.5); letter-spacing: 1px; }
+  nav a { color: var(--muted); text-decoration: none; margin-left: 28px; font-size: 14px;
+    transition: color .25s, text-shadow .25s; }
+  nav a:hover { color: var(--cyan); text-shadow: 0 0 10px rgba(122,162,247,.6); }
+
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 120px 20px 60px; position: relative; z-index: 1;
+  }
+  .hero h1 {
+    font-size: clamp(38px, 7vw, 68px); font-weight: 800; line-height: 1.1;
+    background: linear-gradient(90deg, var(--teal), var(--cyan), var(--purple));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 22px rgba(46,230,214,.35));
+  }
+  .hero p { color: var(--muted); font-size: 18px; margin: 22px 0 34px; max-width: 620px; }
+  .cta {
+    display: inline-block; padding: 16px 42px; border-radius: 14px; font-weight: bold;
+    font-size: 17px; text-decoration: none; color: #0b0b14;
+    background: linear-gradient(90deg, var(--teal), var(--cyan));
+    box-shadow: 0 0 25px rgba(46,230,214,.4);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .cta:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 45px rgba(46,230,214,.65); }
+
+  section { max-width: 1100px; margin: 0 auto; padding: 80px 24px; position: relative; z-index: 1; }
+  h2 { text-align: center; font-size: 34px; margin-bottom: 10px; }
+  h2 span { color: var(--teal); text-shadow: 0 0 14px rgba(46,230,214,.5); }
+  .sub { text-align: center; color: var(--muted); margin-bottom: 46px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+  .card {
+    background: var(--panel); border: 1px solid rgba(122,162,247,.18);
+    border-radius: 16px; padding: 26px;
+    transition: transform .25s, box-shadow .25s, border-color .25s;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    border-color: var(--teal);
+    box-shadow: 0 0 30px rgba(46,230,214,.18);
+  }
+  .card .icon { font-size: 34px; margin-bottom: 14px; }
+  .card h3 { color: var(--cyan); margin-bottom: 10px; font-size: 18px; }
+  .card p { color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+
+  .recovery { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; }
+  .keybox {
+    background: var(--panel); border: 1px solid rgba(187,154,247,.4);
+    border-radius: 16px; padding: 30px; text-align: center;
+    box-shadow: 0 0 30px rgba(187,154,247,.15);
+  }
+  .keybox .key {
+    font-family: 'Consolas', monospace; font-size: 22px; letter-spacing: 3px;
+    color: var(--purple); text-shadow: 0 0 10px rgba(187,154,247,.5); margin: 16px 0;
+  }
+  .steps { list-style: none; }
+  .steps li {
+    background: var(--panel); border-left: 3px solid var(--pink);
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 12px;
+    color: var(--muted); font-size: 14.5px; line-height: 1.5;
+  }
+  .steps b { color: var(--text); }
+
+  .download { text-align: center; }
+  .dl-btn {
+    display: inline-block; padding: 18px 52px; border-radius: 16px; font-size: 19px;
+    font-weight: bold; text-decoration: none; color: #0b0b14;
+    background: linear-gradient(90deg, var(--pink), var(--purple), var(--cyan));
+    background-size: 200% auto; box-shadow: 0 0 30px rgba(247,118,142,.4);
+    transition: transform .2s, box-shadow .2s, background-position .5s;
+  }
+  .dl-btn:hover { transform: scale(1.05); background-position: right center;
+    box-shadow: 0 0 55px rgba(187,154,247,.6); }
+  .note { color: var(--muted); font-size: 13px; margin-top: 18px; }
+
+  footer { text-align: center; padding: 40px; color: var(--muted); font-size: 13px;
+    border-top: 1px solid rgba(122,162,247,.1); position: relative; z-index: 1; }
+
+  @media (max-width: 760px) {
+    nav a { margin-left: 16px; font-size: 12px; }
+    .recovery { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔮 CYBERVAULT</div>
+  <nav>
+    <a href="#features">Возможности</a>
+    <a href="#recovery">Восстановление</a>
+    <a href="#download">Скачать</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>CyberVault<br>твой неоновый сейф</h1>
+  <p>Прячь файлы за ПИН-кодом, раскладывай их по своему рабочему столу
+     и вытаскивай обратно одним кликом. Всё локально, всё под твоим контролем.</p>
+  <a href="#download" class="cta">⬇ Скачать бесплатно</a>
+</div>
+
+<section id="features">
+  <h2>Что умеет <span>CyberVault</span></h2>
+  <p class="sub">Шесть причин не терять файлы</p>
+  <div class="grid">
+    <div class="card"><div class="icon">📥</div><h3>Перетаскивание</h3><p>Бросай файлы мышкой прямо из Проводника — они сразу шифруются и попадают в сейф.</p></div>
+    <div class="card"><div class="icon">🖥️</div><h3>Свой рабочий стол</h3><p>Иконки файлов можно свободно перемещать внутри сейфа — раскладка сохраняется между запусками.</p></div>
+    <div class="card"><div class="icon">🔐</div><h3>ПИН-код</h3><p>Сейф открывается только по 4-значному ПИН. Он запоминается — вводить нужно один раз.</p></div>
+    <div class="card"><div class="icon">💾</div><h3>Сохранение наружу</h3><p>Выдели файл и нажми «Сохранить» — он расшифруется и запишется туда, куда ты выберешь.</p></div>
+    <div class="card"><div class="icon">✨</div><h3>Неоновый дизайн</h3><p>Кнопки светятся и плавно «вздуваются» при наведении. Тёмная тема бережёт глаза.</p></div>
+    <div class="card"><div class="icon">🗂️</div><h3>Управление файлами</h3><p>Добавляй и стирай файлы одной кнопкой, а иконки подстраиваются под тип: фото, музыка, архивы.</p></div>
+  </div>
+</section>
+
+<section id="recovery">
+  <h2>Забыли <span>ПИН?</span></h2>
+  <p class="sub">Встроенный мастер восстановления поможет вернуться в сейф</p>
+  <div class="recovery">
+    <div class="keybox">
+      <div>🔑 Ваш ключ восстановления</div>
+      <div class="key">XXXX XXXX XXXX XXXX</div>
+      <div style="color:var(--muted); font-size:13px;">Запишите его и храните отдельно от сейфа. Никому не пересылайте.</div>
+    </div>
+    <ul class="steps">
+      <li><b>Шаг 1.</b> На экране входа нажмите «Забыл ПИН?»</li>
+      <li><b>Шаг 2.</b> Введите ключ восстановления — пробелы и дефисы убираются автоматически</li>
+      <li><b>Шаг 3.</b> Придумайте новый ПИН и подтвердите его</li>
+      <li><b>Шаг 4.</b> Сразу сохраните новый ключ восстановления в надёжное место</li>
+    </ul>
+  </div>
+</section>
+
+<section id="download" class="download">
+  <h2>Скачать <span>CyberVault</span></h2>
+  <p class="sub">Бесплатно · для Windows · нужен установленный Python с PyQt6</p>
+  <a id="dl" class="dl-btn" href="#">⬇ Скачать CyberVault</a>
+  <p class="note">Файл скачивается из облачного хранилища автора.</p>
+</section>
+
+<footer>🔮 CyberVault Premium Space · сделано с любовью к неону</footer>
+
+<script>
+  /* ================================================================
+     СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ ОБЛАКА.
+     Пример для Google Диска:
+     const DOWNLOAD_URL = "https://drive.google.com/uc?export=download&id=ВАШ_ID";
+     (после включения доступа «все, у кого есть ссылка»)
+     ================================================================ */
+  const DOWNLOAD_URL = ""; // <-- замени на ссылку
+
+  const btn = document.getElementById('dl');
+  if (!DOWNLOAD_URL) {
+    btn.textContent = "⚠ Ссылка на файл ещё не настроена";
+    btn.style.filter = "grayscale(1) brightness(.7)";
+    btn.title = "Автор сайта ещё не опубликовал файл";
+  } else {
+    btn.href = DOWNLOAD_URL;
+    btn.setAttribute('download', 'cyber_vault_premium.py');
+  }
+</script>
+
+</body>
+</html>
